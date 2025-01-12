@@ -1,0 +1,77 @@
+import requests
+from bs4 import BeautifulSoup
+import time
+from google.colab import files
+
+# Daftar URL untuk diunduh
+urls = [
+  
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/373-kajawen-balai-pustaka-1928-01-04-49",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2041-kajawen-balai-pustaka-1928-01-07-51",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2042-kajawen-balai-pustaka-1928-01-11-52",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2043-kajawen-balai-pustaka-1928-01-14-53",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2044-kajawen-balai-pustaka-1928-01-18-54",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2045-kajawen-balai-pustaka-1928-01-21-58",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2046-kajawen-balai-pustaka-1928-01-25-61",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2047-kajawen-balai-pustaka-1928-01-28-62",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/374-kajawen-balai-pustaka-1928-02-01-65",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2053-kajawen-balai-pustaka-1928-02-04-67",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2048-kajawen-balai-pustaka-1928-02-08-69",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2049-kajawen-balai-pustaka-1928-02-11-70",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2050-kajawen-balai-pustaka-1928-02-15-72",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2051-kajawen-balai-pustaka-1928-02-18-73",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2052-kajawen-balai-pustaka-1928-02-29-74",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/375-kajawen-balai-pustaka-1928-03-10-76",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2054-kajawen-balai-pustaka-1928-03-14-77",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2055-kajawen-balai-pustaka-1928-03-17-78",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2056-kajawen-balai-pustaka-1928-03-28-79",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2057-kajawen-balai-pustaka-1928-03-31-1643",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/376-kajawen-balai-pustaka-1928-04-04-82",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2058-kajawen-balai-pustaka-1928-04-14-1643",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2059-kajawen-balai-pustaka-1928-04-18-140",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/377-kajawen-balai-pustaka-1928-05-05-141",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2060-kajawen-balai-pustaka-1928-05-12-143",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2061-kajawen-balai-pustaka-1928-05-19-144",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2062-kajawen-balai-pustaka-1928-05-23-146",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2063-kajawen-balai-pustaka-1928-05-26-159",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/378-kajawen-balai-pustaka-1928-06-02-160",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2064-kajawen-balai-pustaka-1928-06-06-168",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2065-kajawen-balai-pustaka-1928-06-20-178",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2066-kajawen-balai-pustaka-1928-06-27-185",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2067-kajawen-balai-pustaka-1928-06-30-186",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/379-kajawen-balai-pustaka-1928-07-04-187",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2068-kajawen-balai-pustaka-1928-07-11-188",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2069-kajawen-balai-pustaka-1928-07-28-189",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/380-kajawen-balai-pustaka-1928-08-01-190",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2070-kajawen-balai-pustaka-1928-08-04-191",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2071-kajawen-balai-pustaka-1928-08-11-192",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/381-kajawen-balai-pustaka-1928-09-01-202",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2072-kajawen-balai-pustaka-1928-09-05-203",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2073-kajawen-balai-pustaka-1928-09-08-206",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2074-kajawen-balai-pustaka-1928-09-12-207",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2075-kajawen-balai-pustaka-1928-09-19-212",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/382-kajawen-balai-pustaka-1928-10-06-215",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2076-kajawen-balai-pustaka-1928-10-10-237",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2077-kajawen-balai-pustaka-1928-10-17-223",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/2078-kajawen-balai-pustaka-1928-10-20-224",
+    "https://www.sastra.org/koran-majalah-dan-jurnal/kajawen/383-kajawen-balai-pustaka-1928-11-10-225"
+]
+
+# Mengambil konten dari URL dan menggabungkannya
+full_text = ""
+
+for url in urls:
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    # Misalkan artikel ada di dalam tag <div class="content">
+    article_content = soup.find('div', class_='entry-content')  # Disesuaikan dengan elemen yang benar
+    if article_content:
+        full_text += article_content.get_text() + "\n\n"
+    time.sleep(1)  # Menghindari terlalu banyak permintaan dalam waktu singkat
+
+# Menyimpan hasil ke dalam file teks
+with open('/mnt/data/kajawen_articles.txt', 'w', encoding='utf-8') as f:
+    f.write(full_text)
+
+# Mengunduh file
+files.download('/mnt/data/kajawen_articles.txt')

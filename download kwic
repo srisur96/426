@@ -1,0 +1,44 @@
+import pandas as pd
+import re
+
+# Function to extract 30 words before and after the keyword
+def get_contexts(text, keyword, window=30):
+    pattern = rf"((?:\S+\s+){{0,{window}}}){keyword}((?:\s+\S+){{0,{window}}})"
+    matches = re.finditer(pattern, text, re.IGNORECASE)
+    contexts = [match.group(0) for match in matches]
+    return contexts
+
+# Replace with your file paths
+file_paths = [
+    "/path/to/1927_kajawen.txt",
+    "/path/to/1928_kajawen.txt",
+    "/path/to/1929_kajawen.txt",
+    "/path/to/1930_kajawen.txt",
+    "/path/to/1931_kajawen.txt",
+]
+
+# Keyword to search for
+keyword = "Walandi"
+
+# Store results in a list
+results = []
+
+for file_path in file_paths:
+    with open(file_path, 'r', encoding='utf-8') as f:
+        text = f.read()
+        contexts = get_contexts(text, keyword, window=30)
+        for i, context in enumerate(contexts):
+            results.append({
+                "File": file_path.split('/')[-1],
+                "Context Number": i + 1,
+                "Context": context.strip()
+            })
+
+# Convert results to DataFrame
+df = pd.DataFrame(results)
+
+# Save to CSV
+output_path = "/path/to/Walandi_contexts.csv"  # Replace with your desired save path
+df.to_csv(output_path, index=False, encoding="utf-8")
+
+print(f"Data saved to: {output_path}")

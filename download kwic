@@ -1,44 +1,62 @@
-import pandas as pd
 import re
+import pandas as pd
+import os
+from google.colab import drive
 
-# Function to extract 30 words before and after the keyword
-def get_contexts(text, keyword, window=30):
+# Mount Google Drive
+drive.mount('/content/drive')
+
+# Path to the Kejawen folder in Google Drive
+folder_path = '/content/drive/My Drive/Kejawen'
+
+# Read all text files in the Kejawen folder
+file_contents = {}
+for file_name in os.listdir(folder_path):
+    if file_name.endswith('.txt'):  # Process only .txt files
+        with open(os.path.join(folder_path, file_name), 'r', encoding='utf-8') as f:
+            file_contents[file_name] = f.read()
+
+# Keyword and parameters
+keyword = "Walandi"
+context_window = 30  # Number of words before and after the keyword
+
+# Function to extract contexts around the keyword
+def get_contexts(text, keyword, window):
     pattern = rf"((?:\S+\s+){{0,{window}}}){keyword}((?:\s+\S+){{0,{window}}})"
     matches = re.finditer(pattern, text, re.IGNORECASE)
     contexts = [match.group(0) for match in matches]
     return contexts
 
-# Replace with your file paths
-file_paths = [
-    "/path/to/1927_kajawen.txt",
-    "/path/to/1928_kajawen.txt",
-    "/path/to/1929_kajawen.txt",
-    "/path/to/1930_kajawen.txt",
-    "/path/to/1931_kajawen.txt",
-]
+# Search for contexts in each file
+contexts_per_file = {}
+for file, content in file_contents.items():
+    contexts = get_contexts(content, keyword, context_window)
+    contexts_per_file[file] = contexts
 
-# Keyword to search for
-keyword = "Walandi"
+# Create a DataFrame for the results
+rows = []
+for file, contexts in contexts_per_file.items():
+    for i, context in enumerate(contexts):
+        rows.append({"File": file, "Context Number": i + 1, "Context": context.strip()})
 
-# Store results in a list
-results = []
+df = pd.DataFrame(rows)
 
-for file_path in file_paths:
-    with open(file_path, 'r', encoding='utf-8') as f:
-        text = f.read()
-        contexts = get_contexts(text, keyword, window=30)
-        for i, context in enumerate(contexts):
-            results.append({
-                "File": file_path.split('/')[-1],
-                "Context Number": i + 1,
-                "Context": context.strip()
-            })
+# Add a column for the total number of contexts per file
+total_per_file = df.groupby("File").size().reset_index(name="Total Contexts")
+df_summary = pd.merge(total_per_file, df, on="File", how="left")
 
-# Convert results to DataFrame
-df = pd.DataFrame(results)
+# Output path for the CSV file in Google Drive
+output_path = "/content/drive/My Drive/Walandi_contexts.csv"
 
-# Save to CSV
-output_path = "/path/to/Walandi_contexts.csv"  # Replace with your desired save path
+# Create the directory if necessary
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+# Save the DataFrame to a CSV file
 df.to_csv(output_path, index=False, encoding="utf-8")
 
-print(f"Data saved to: {output_path}")
+# Output the result
+print(f"The result has been saved to: {output_path}")
+
+# Optional: Download the file directly in Colab
+from google.colab import files
+files.download(output_path)

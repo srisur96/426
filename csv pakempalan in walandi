@@ -1,0 +1,26 @@
+# Import library yang diperlukan
+import pandas as pd
+from google.colab import drive
+
+# 1. Mount Google Drive
+drive.mount('/content/drive')
+
+# 2. Path file Walandi_contexts.csv di Google Drive
+file_path = '/content/drive/My Drive/Walandi_contexts.csv'  # Ganti dengan path yang sesuai
+
+# 3. Membaca file CSV
+data = pd.read_csv(file_path)
+
+# 4. Mencari kata "pakêmpalan" dalam kolom "Konteks"
+pakempalan_in_walandi = data[data["Konteks"].str.contains("pakêmpalan", na=False, case=False)]
+
+# 5. Menampilkan beberapa baris hasil pencarian
+print("Beberapa hasil pencarian 'pakêmpalan':")
+print(pakempalan_in_walandi.head())
+
+# 6. Menyimpan hasil ke file baru
+output_path = '/content/drive/My Drive/Pakempalan_in_Walandi.csv'  # Ganti path jika diperlukan
+pakempalan_in_walandi.to_csv(output_path, index=False, encoding='utf-8')
+
+# 7. Memberikan informasi lokasi file hasil
+print(f"Hasil pencarian telah disimpan di: {output_path}")

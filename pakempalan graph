@@ -1,22 +1,26 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Load the uploaded CSV file
-file_path = "/mnt/data/Pakempalan_in_Walandi.csv"
-data = pd.read_csv(file_path)
+# Upload file dari Google Colab
+from google.colab import files
+uploaded = files.upload()
+
+# Load file Pakempalan_in_Walandi.csv
+file_path = list(uploaded.keys())[0]
+pakempalan_data = pd.read_csv(file_path)
 
 # Extract year information from the "File" column assuming year is part of the filename
-data['Year'] = data['File'].str.extract(r'(\d{4})').astype(int)
+pakempalan_data['Year'] = pakempalan_data['File'].str.extract(r'(\d{4})').astype(int)
 
 # Count occurrences of "pakêmpalan" by year
-yearly_counts = data['Year'].value_counts().sort_index()
+pakempalan_yearly_counts = pakempalan_data['Year'].value_counts().sort_index()
 
-# Plot the data
+# Plot the data for "pakêmpalan"
 plt.figure(figsize=(10, 6))
-yearly_counts.plot(kind='bar')
+pakempalan_yearly_counts.plot(kind='bar', color='lightcoral', edgecolor='black')
 plt.xlabel("Year")
-plt.ylabel("Frequency of 'pakêmpalan'")
-plt.title("Frequency of 'pakêmpalan' by Year")
+plt.ylabel("Frequency of 'Pakêmpalan'")
+plt.title("Frequency of 'Pakêmpalan' by Year")
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
